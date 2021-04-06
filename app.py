@@ -1,3 +1,6 @@
+#Kafka Start
+#Kafka로 간단한 Micro Service 구현
+
 import os
 from models import db
 from flask import Flask, jsonify, request #jsonify: json파일 사용을 위한 라이브러리
