@@ -9,9 +9,6 @@ import mariadb
 import json
 import uuid
 
-#실행파일 변경: export FLASK_APP='파일명'
-#디버그 모드 실행: set FLASK_DEBUG=True -> auto refresh
-#app.config['DEBUG'] = True 
 app = Flask(__name__)
 api = flask_restful.Api(app)
 
@@ -23,7 +20,8 @@ config = {
     'database' : 'mydb'
 }
 
-@app.route('/order-ms')
+#endpoint
+@app.route('/')
 def index():
     return "Order MicroService!"
 
@@ -32,36 +30,35 @@ class Order(flask_restful.Resource):
     def __init__(self):
         self.conn = mariadb.connect(**config)
         self.cursor = self.conn.cursor()
-        
+        #KAFKA SERVER 연결
         self.producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
-
+    
+    #GET 메소드
     def get(self, user_id):
-        sql = "select user_id, order_id, coffee_name, coffee_price, coffee_qty from orders where user_id=? order by id desc"
+        sql = '''select user_id, order_id, coffee_name, coffee_price, coffee_qty 
+                from orders where user_id=? order by user_id desc'''
         self.cursor.execute(sql, [user_id])
         result_set = self.cursor.fetchall()
 
-        row_headers = [x[0] for x in self.cursor.descripton]
+        row_headers = [x[0] for x in self.cursor.description]
+
         json_data = []
         for result in result_set:
             json_data.append(dict(zip(row_headers, result)))
 
         return jsonify(json_data)
 
+    #POST 메소드
     def post(self, user_id):
-        # parser = reqparse.RequestParser()
-        # args = parser.parse_args()
-
         json_data = request.get_json()
         json_data['user_id'] = user_id
-        json_data['order_id'] = uuid.uuid4()
-        json_data['order_date'] = datetime.today()
+        json_data['order_id'] = str(uuid.uuid4()) 
+        # json_data['ordered_at'] = str(datetime.today())
 
-        # coffee_name = json_data['coffee_name']
-        # coffee_price = json_data['coffee_price']
-        # coffee_qty = json_data['coffee_qty']
-
-        #DB Insert
-        sql = "INSERT INTO orders(user_id, order_id, coffee_name, coffee_price, coffee_qty) VALUES(?,?,?,?,?)"
+        # DB insert
+        sql = '''INSERT INTO orders(user_id, order_id, coffee_name, coffee_price, coffee_qty) 
+                    VALUES(?, ?, ?, ?, ?)
+        '''
         self.cursor.execute(sql, [user_id, 
                                 json_data['order_id'],
                                 json_data['coffee_name'],
@@ -69,12 +66,14 @@ class Order(flask_restful.Resource):
                                 json_data['coffee_qty']])
         self.conn.commit()
 
-        #Kafka Messeage Send
-        self.producer.send('new_orders', value=json.dump(json_data).encode('utf-8'))
-        self.producer.flush()
+        # Kafka message send
+        # Kafka Consumer인 new_orders에 전송
+        self.producer.send('new_orders', value=json.dumps(json_data).encode())
+        self.producer.flush() 
 
         response = jsonify(json_data)
-        response.status_cod = 201
+        response.status_code = 201
+        
         return response
 
 
@@ -86,6 +85,7 @@ class OrderDetail(flask_restful.Resource):
 
 #GET http://127.0.0.1:5000//order-ms/<string:user_id>/orders
 #POST http://127.0.0.1:5000//order-ms/<string:user_id>/orders {request body }
+#Ex)POST http://127.0.0.1:5000/order-ms/USER0002/orders : orders 테이블에 데이터 추가
 api.add_resource(Order, '/order-ms/<string:user_id>/orders')
 api.add_resource(OrderDetail, '/order-ms/<string:user_id>/orders/<string:order_id>')
 
