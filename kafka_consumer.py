@@ -13,7 +13,7 @@ consumer = KafkaConsumer('new_orders',
                         auto_commit_interval_ms=1000,
                         consumer_timeout_ms=1000
                         )
-
+#MariaDB 연동
 config = {
     'host': '127.0.0.1',
     'port': 3306,
@@ -25,35 +25,29 @@ config = {
 conn = mariadb.connect(**config)
 cursor = conn.cursor()
 sql = '''INSERT INTO delivery_status(delivery_id, order_json, status)
-        VALUE(?,?,?) %s'''
+            VALUES(?, ?, ?)'''
+
+
 #최신데이터 실시간 로드
 #시스템에 알림을 주는 것은 부하 발생 우려가 있음
-def fetech_latest_orders(next_call_in):
-    next_call_in += 5
+def fetch_latest_orders(next_call_in):
+    next_call_in += 30 #주기
 
     batch = consumer.poll(timeout_ms=100)
     if len(batch) > 0:
         for message in list(batch.values())[0]:
             value = message.value.decode()
-            # order_dict = json.loads(value)
-            # print(order_dict["ordered_at"])
 
             delivery_id = str(uuid.uuid4())
             status = 'CONFIRMED'
+            # db insert 
             cursor.execute(sql, [delivery_id, value, status])
-            conn.commit
-    # list(batch.values())
-    threading.Timer(next_call_in - time.time(), fetech_latest_orders, [next_call_in]).start()
+            conn.commit()
+
+    threading.Timer(next_call_in - time.time(),
+                    fetch_latest_orders,
+                    [next_call_in]).start()
 
 #주기적으로 데이터 받기
 next_call_in = time.time()
-fetech_latest_orders(next_call_in)
-
-# start = time.time()
-# for message in consumer:
-#     topic = message.topic
-#     partition = message.partition
-#     offset = message.offset
-#     value = message.value
-#     print("Topic:{}, Partition:{}, Offset:{}, Value:{}".format(topic, partition, offset, value))
-# print("Elapsed: ", + (time.time() - start))
+fetch_latest_orders(next_call_in)
