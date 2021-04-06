@@ -25,14 +25,14 @@ class FlaskTest(unittest.TestCase):
 
     #Muliply 메소드 동작 테스트
     def test_multiply(self):
-        response = self.client.post('/api/multiply?param1=3&param2=4')
+        response = self.client.post('/api/multiply?param1=3&param2=4') #파라미터 3,4 전송
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("application/json", response.content_type)
+        self.assertEqual(response.status_code, 200) #상태코드 200과 비교(=정상인지 비교)
+        self.assertIn("application/json", response.content_type) #타입 비교
         #json 형식 로드
-        json_result = json.loads(response.data)
-        self.assertEqual(json_result.get('state'), 1)
-        self.assertEqual(json_result.get('response'), 12)
+        json_result = json.loads(response.data) #데이터를 갖고와
+        self.assertEqual(json_result.get('state'), 1) #상태 비교
+        self.assertEqual(json_result.get('response'), 12) #결과 비교
 
 if __name__ == "__main__":
     unittest.main()
