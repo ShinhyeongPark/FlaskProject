@@ -1,3 +1,4 @@
+#Flask는 Django에 비해, 간단하며 리소스를 적게 사용
 from flask import Flask, jsonify, request
 from flask_restful import reqparse
 from datetime import datetime
@@ -7,8 +8,10 @@ import mariadb
 import json
 import uuid
 
+#실행파일 변경: export FLASK_APP='파일명'
+#디버그 모드 실행: set FLASK_DEBUG=True -> auto refresh
+#app.config['DEBUG'] = True 
 app = Flask(__name__)
-app.config['DEBUG'] = True
 api = flask_restful.Api(app)
 
 config = {

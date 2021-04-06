@@ -16,7 +16,7 @@ def index():
 class HelloWorld(flask_restful.Resource):
     def get(self):
         parser = reqparse.RequestParser()
-
+        #Ex) GET /api/multiply?param1=3&param2=4
         parser.add_argument('param1')
         parser.add_argument('param2')
         args = parser.parse_args()
