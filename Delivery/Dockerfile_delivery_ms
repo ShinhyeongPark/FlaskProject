@@ -1,0 +1,16 @@
+#파이썬 이미지를 사용한다
+FROM python:3.8-alpine 
+
+#작업할 디렉터리를 생성하고 지정
+RUN mkdir -p /MSAproject
+WORKDIR /MSAproject
+
+#의존성 패키지 명시 파일
+COPY requirements.txt /MSAproject
+COPY delivery_ms.py /MSAproject
+
+#라이브러리 설치
+RUN pip install -r requirements.txt
+
+EXPOSE 5000
+ENTRYPOINT ["flask", "run", "--port", "5000"]
