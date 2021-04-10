@@ -77,8 +77,8 @@ SQLAlchemy==1.4.5
   "config" : {
     "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
     "connection.url" : "jdbc:mysql://127.0.0.1:3306/mydb",
-    "connection.user" : "root",
-    "connection.password" : "mysql",
+    "connection.user" : "[host]",
+    "connection.password" : "[password]]",
     "mode": "incrementing",
     "incrementing.column.name" : "id",
     "table.whitelist" : "users",
@@ -94,9 +94,9 @@ echo ' {
     "name":"shinhyeong_sink_connect",
     "config":{
 "connector.class":"io.confluent.connect.jdbc.JdbcSinkConnector",
-"connection.url":"jdbc:mysql://multicampus-clouda.cgx0gwgzdjyz.us-east-1.rds.amazonaws.com:3306/mydb",
-"connection.user":"admin",
-"connection.password":"test1357",
+"connection.url":"[server]",
+"connection.user":"[host]",
+"connection.password":"[password]]",
 "auto.create":"true", "auto.evolve":"true", "delete.enabled":"false", "tasks.max":"1", "topics": "shinhyeong_exam_topicusers"
   } }
 '| curl -X POST -d @- http://localhost:8083/connectors --header "content-Type:application/json"
