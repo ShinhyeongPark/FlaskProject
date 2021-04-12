@@ -8,13 +8,13 @@
 - Site: [Apache Kafka](https://kafka.apache.org/)
 
 ## Kafka Command
-	1. Zookeeper Server Start(Port: 2181)
+	-  Zookeeper Server Start(Port: 2181)
 
 ```
 $ bin/zookeeper-server-start.sh config/zookeeper.properties
 ```
 
-	2. Kafka Server Start (Port: 9092)
+	-  Kafka Server Start (Port: 9092)
 
 ```
 $ bin/kafka-server-start.sh config/server.properties
@@ -23,13 +23,13 @@ listeners=PLAINTEXT://localhost:9092
 
 ```
 
-	3. Kafka Topic 생성
+	-  Kafka Topic 생성
 
 ```
 bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
 ```
 
-	4. Kafka Topic List
+	-  Kafka Topic List
   
 ```
 bin/kafka-topics --list --bootstrap-server localhost:9092 
